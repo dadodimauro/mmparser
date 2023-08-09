@@ -1,0 +1,35 @@
+{
+    "This table displays load profile": [
+        "load_profile.csv",
+        "Name,Per Second,Per Transaction,Per Exec,Per Call"
+    ],
+    "This table displays top SQL by elapsed time": [
+        "sql_elapsed.csv",
+        "Elapsed Time (s),Executions,Elapsed Time Per Exec,%Total,%CPU,%IO,SQL Id,SQL Module,PDB Name,SQL Text"
+    ],
+    "This table displays top SQL by CPU time": [
+        "sql_cpu.csv",
+        "CPU Time (s),Executions,CPU per Exec (s),%Total,Elapsed Time,%CPU,%IO,SQL Id,SQL Module,PDB Name,SQL Text"
+    ],
+    "This table displays top SQL by user I/O time": [
+        "sql_user_io.csv",
+        "User I/O Time (s),Executions,UIO per Exec (s),%Total,Elapsed Time,%CPU,%IO,SQL Id,SQL Module,PDB Name,SQL Text"
+    ],
+    "This table displays top 10 wait events by total wait time": [
+        "foreground_events_wait.csv",
+        "Event,Waits,Total Wait Time (sec),Avg Wait, % DB time,Wait Class"
+    ],
+    "This table displays wait class statistics ordered by total wait time": [
+        "wait_classes.csv",
+        "Wait Class,Waits,Total Wait Time (sec),Avg Wait Time,% DB time, Avg Active Session"
+    ],
+    "This table displays IO Statistics for different tablespaces. IO Statistics include amount of reads and writes, average read/write per second, average blocks per read, buffer waits": [
+        "tablespace_io.csv",
+        "Tablespace,Reads,Av Rds/s,Av Rd(ms),Av Blks/Rd,1-bk Rds/s,Av 1-bk Rd(ms),% Opt Reads,Writes,Writes avg/s,Av Writes(ms),Buffer Waits,Av Buf Wt(ms),PDB Name"
+    ],
+    "This table displays IO Statistics for different file types, such as data files, control files, log files and temp files. IO Statistics include amount of reads and writes, requests per second, data per second, wait count and average wait time": [
+        "io_filetype.csv",
+        "Filetype Name,Reads: Data,Reqs per sec,Data per sec,Writes: Data,Reqs per sec,Data per sec,Small Read,Large Read"
+    ]
+}
+
