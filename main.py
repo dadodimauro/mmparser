@@ -21,14 +21,28 @@ from preprocessing.awr_preprocessing.wait_classes_processing import WaitClassPro
 from preprocessing.awr_preprocessing.foreground_events_waits_processing import ForegroundEventWaitProcessor
 from preprocessing.awr_preprocessing.tablespace_io_processing import TablespaceIoProcessor
 
+from args_parser import args
 
-data = get_tables_from_json('tables.json')
+
+### PARSE DATA
+
+data = get_tables_from_json(args.tables)
 p = AWRParser(data)
-p.make_csv(mode='new', input_dir='data/centrico_2h', output_dir='data/parsed/centrico_2h', recursive=True)
+
+print("Parsing data...")
+p.make_csv(mode=args.mode, 
+           input_dir=args.inputDir, 
+           output_dir=args.outputDir, 
+           recursive=args.recursive)
+
+print("Parsing complete!")
 
 
 
-input_path = 'data/parsed/centrico_2h'
+### GENERATE REPORT
+
+print("Generating report...")
+input_path = args.inputDir
 l = LoadProcessor('load-prc', input_path=input_path)
 df = l.grouped_dfs
 
@@ -187,3 +201,5 @@ dp.save_report(
         width=dp.Width.FULL,
     )
 )
+
+print("Report created!")

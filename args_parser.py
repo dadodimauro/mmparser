@@ -14,32 +14,39 @@ def str2bool(v):
 
 parser = argparse.ArgumentParser(description='AWR parser (html only)')
 
-parser.add_argument('--instance',
-                    '-i',
-                    type=int,
-                    required=False,
-                    default=0,
-                    help="Specify the instance to plot if AWR report for multiple instances" +
-                         "are present in the input folder"
-                    )
-
-parser.add_argument('--type',
-                    '-t',
+parser.add_argument('--mode',
+                    '-m',
                     type=str,
                     required=False,
-                    nargs='*',  # 0 or more arguments
-                    default=["png"],
-                    help="Specify the format of the output images"
+                    default="append",
+                    help="Specify the mode, can be 'append' to add to an existing csv file or 'new'"
                     )
 
-parser.add_argument('--parse',
+parser.add_argument('--recursive',
+                    '-r',
                     type=str2bool,
                     required=False,
-                    nargs='?',
-                    const=True,
                     default=True,
-                    help="set to False if only the plotting is needed"
+                    help="If the search for awr reports must be done recursively"
                     )
 
+parser.add_argument('--tables',
+                    type=str,
+                    required=False,
+                    default="tables.json",
+                    help="Specify the path where to find the awr reports"
+                    )
+
+parser.add_argument('--inputDir',
+                    type=str,
+                    required=True,
+                    help="Specify the path where to find the awr reports"
+                    )
+
+parser.add_argument('--outputDir',
+                    type=str,
+                    required=True,
+                    help="Specify the path where to save the final .html report and .csv files"
+                    )
 
 args = parser.parse_args()
