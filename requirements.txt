@@ -1,0 +1,6 @@
+bs4==0.0.1
+datapane==0.17.0
+numpy==1.26.1
+pandas==1.5.3
+plotly==5.17.0
+pythresh==0.3.4

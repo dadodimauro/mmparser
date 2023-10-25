@@ -27,9 +27,9 @@
         "tablespace_io.csv",
         "Tablespace,Reads,Av Rds/s,Av Rd(ms),Av Blks/Rd,1-bk Rds/s,Av 1-bk Rd(ms),% Opt Reads,Writes,Writes avg/s,Av Writes(ms),Buffer Waits,Av Buf Wt(ms),PDB Name"
     ],
-    "This table displays IO Statistics for different file types, such as data files, control files, log files and temp files. IO Statistics include amount of reads and writes, requests per second, data per second, wait count and average wait time": [
-        "io_filetype.csv",
-        "Filetype Name,Reads: Data,Reqs per sec,Data per sec,Writes: Data,Reqs per sec,Data per sec,Small Read,Large Read"
+    "This table displays the top sessions that are blocking other sessions.": [
+        "blocking_sessions.csv",
+        "Blocking Sid (Inst),% Activity,Event Caused,% Event,User,Program,# Samples Active,XIDs"
     ]
 }
 

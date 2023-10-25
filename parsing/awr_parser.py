@@ -83,6 +83,7 @@ class AWRParser:
         """
 
         output = {}
+        host_info = {}
 
         for filename in filelist:
             print('Processing {0}...'.format(filename))
@@ -121,6 +122,13 @@ class AWRParser:
                         l_base.extend(str(x) for x in (st.year, st.month, st.day, st.hour, st.minute, st.second))
                     d_base = ','.join(l_base) + ','
 
+                ##### extract host informaion
+                elif section == 'This table displays host information':
+                    host_info['__header__'] = 'Host Name,Platform,CPUs,Cores,Sockets,Memory (GB)'
+                    l_host = [self.tfix(x) for x in table.find_all('td')]
+                    if l_host[0] not in host_info.keys():
+                        host_info[l_host[0]] = ','.join(l_host)
+
                 ##### for other sections, convert <th><td> structure into a CSV
                 elif section in self.t:
                     # print(section)
@@ -146,10 +154,15 @@ class AWRParser:
                             d_data = ','.join(l_td)
                             output[csvname].append(d_base + d_data)
 
+        output['host_info.csv'] = []
+        for v in host_info.values():
+            output['host_info.csv'].append(v)
+
         ##### return output
         return output
 
-    def make_csv(self, mode='append', input_dir='data/raw/awr', output_dir='data/parsed/awr'):
+    def make_csv(self, mode='append', input_dir='data/raw/awr', output_dir='data/parsed/awr',
+                        recursive=False):
         """
         Parse the data and stores it into multiple .csv files, one for each AWR table
 
@@ -162,6 +175,9 @@ class AWRParser:
                     path of the input data (AWR reports in .html format)
         output_dir: str
                     path of the output data
+        recursive: (optional) bool
+                    if there are subfolders in the specified input directory to be used
+                    (like the -r in unix)
         """
 
         if mode not in ['append', 'new']:
@@ -169,7 +185,10 @@ class AWRParser:
             mode = 'append'
 
         filepath = Path(f'{input_dir}')
-        filelist = sorted(filepath.glob('*.html'))
+        if recursive:
+            filelist = sorted(filepath.rglob('*.html'))
+        else:
+            filelist = sorted(filepath.glob('*.html'))
 
         # parse AWR
         output = self.parse(filelist)
@@ -181,19 +200,19 @@ class AWRParser:
             if mode == 'append':
                 out_filepath = Path(f'{output_dir}') / csvname
                 if os.path.isfile(out_filepath):
-                    f = codecs.open(out_filepath, 'a', encoding='utf-8')  # if file already exists append
+                    f = open(out_filepath, 'a', encoding='utf-8')  # if file already exists append
                     flag = True
                     print('  Updated: ' + csvname)
                 else:
-                    f = codecs.open(out_filepath, 'w', encoding='utf-8')
+                    f = open(out_filepath, 'w', encoding='utf-8')
                     print('  Created: ' + csvname)
             else:  # new
-                timestamp = int(time())
-                out_filepath = Path(f'{output_dir}') / str(timestamp)
+                # timestamp = int(time())
+                # out_filepath = Path(f'{output_dir}') / str(timestamp)
                 if not os.path.exists(out_filepath):
                     os.mkdir(out_filepath)
-                out_filepath = Path(f'{output_dir}') / str(timestamp) / csvname
-                f = codecs.open(out_filepath, 'w', encoding='utf-8')
+                out_filepath = Path(f'{output_dir}') / csvname
+                f = open(out_filepath, 'w', encoding='utf-8')
                 print('  Created: ' + csvname)
 
             # write/append on a different file for each table

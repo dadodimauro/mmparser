@@ -8,6 +8,7 @@ class AWRProcessor:
     """
     Base AWRProcessor class, inherited by the other more specific Processor classes for the different AWR tables
     """
+
     def __init__(self, name, input_path='data/parsed/awr', aggregated_path=None):
         """
 
@@ -20,8 +21,12 @@ class AWRProcessor:
         aggregated_path : Deprecated
         """
         self.name = name
+        if input_path is None:
+            input_path = 'data/parsed/awr'
         self.input_path = Path(input_path)
         # self.aggregated_path = Path(aggregated_path)
+        self.system_info = None
+        self.tot_instances = None
 
     def read_df(self, filepath):
         """
@@ -90,6 +95,7 @@ class AWRProcessor:
     def drop_system_info(self, df):
         """
         Drop dataframe columns containing system information
+        The information about the instance are saved in the variable self.system_info
 
         Parameters
         ----------
@@ -100,5 +106,52 @@ class AWRProcessor:
         dataframe without the system information
         """
 
+        self.system_info = df[['DB_NAME', 'DB_ID', 'UNIQUE_NAME', 'ROLE', 'INSTANCE_NAME']].head(1)
+        tot_instaces = df['INST_NUM'].values.max()
+        self.system_info['INST_NUM'] = tot_instaces
+
         df = df.drop(['DB_NAME', 'DB_ID', 'UNIQUE_NAME', 'ROLE', 'INSTANCE_NAME', 'INST_NUM'], axis=1)
+        # df = df.drop(['DB_NAME', 'DB_ID', 'UNIQUE_NAME', 'ROLE', 'INSTANCE_NAME'], axis=1)
         return df
+
+    def split_by_instance(self, df):
+        """
+        Divide the original dataframe into smaller ones, one for each instance
+
+        Parameters
+        ----------
+        df : Dataframe
+
+        Returns
+        -------
+        List of dataframes divided by instance
+        """
+
+        if self.system_info is None:
+            tot_instances = df['INST_NUM'].values.max()
+            self.tot_instances = tot_instances
+        else:
+            print('Error! system info already removed form the dataframe')
+            return
+
+        df_list = []
+        for i in range(tot_instances):
+            df_list.append(df[df['INST_NUM'] == i + 1])
+
+        return df_list
+
+    def filter_by_instance(self, df, instance):
+        return df[df['INST_NUM'] == instance + 1]
+
+    def get_num_instances(self, df):
+        if self.tot_instances is not None:
+            return self.tot_instances
+
+        if self.system_info is None:
+            tot_instances = df['INST_NUM'].values.max()
+            self.tot_instances = tot_instances
+        else:
+            print('Error! system info already removed form the dataframe')
+            return
+
+        return self.tot_instances
