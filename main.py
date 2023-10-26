@@ -80,7 +80,7 @@ for i in range(p.get_num_instances()):
 
 
 wc = WaitClassProcessor('waitClasses-prc', input_path=input_path)
-fig3 = generate_wait_classes_plot(wc.grouped_dfs[1])
+# fig3 = generate_wait_classes_plot(wc.grouped_dfs[1])
 
 
 fw = ForegroundEventWaitProcessor('feWait-prc', input_path=input_path)
@@ -103,6 +103,7 @@ tio = TablespaceIoProcessor('tbs-proc', input_path=input_path)
 
 
 select_list = []
+
 for i in range(len(figures_list)): # for each instance
     block_list = []
     for j in range(len(metric_list)):
@@ -124,68 +125,129 @@ df_host = df_host.set_index('Host Name')
 df_db = l.df[['DB_NAME', 'DB_ID', 'UNIQUE_NAME', 'ROLE', 'INSTANCE_NAME', 'INST_NUM']].drop_duplicates()
 df_db = df_db.set_index('INSTANCE_NAME')
 
+# set the number of instances
+NUM_INSTANCES=l.get_num_instances(df)
 
-#TODO add SYSTEM INFO
-#TODO add TABLESPACE IO
 #TODO reformat all "Critical Timestamps" tables
 #TODO add log io stats
 
-datapane_app = dp.Blocks(
-    dp.Page(
-        dp.Group(
-            dp.Text("## Database Info"),
-            dp.Table(df_db),
-            columns=1
+if NUM_INSTANCES > 1:
+
+    datapane_app = dp.Blocks(
+        dp.Page(
+            dp.Group(
+                dp.Text("## Database Info"),
+                dp.Table(df_db),
+                columns=1
+            ),
+            dp.HTML("""
+                <html>
+                <body style="background-color:white;">
+                    <div>
+                    <p> &nbsp&nbsp&nbsp  </p>
+                    </div>
+                </body>
+                </html>
+                """),
+            dp.Group(
+                dp.Text("## Host Info"),
+                dp.Table(df_host),
+                columns=1
+            ),
+            title='System Info'
         ),
-        dp.HTML("""
-            <html>
-            <body style="background-color:white;">
-                <div>
-                  <p> &nbsp&nbsp&nbsp  </p>
-                </div>
-            </body>
-            </html>
-            """),
-        dp.Group(
-            dp.Text("## Host Info"),
-            dp.Table(df_host),
-            columns=1
+        dp.Page(
+            dp.Select(
+                blocks=overview_list
+            ),
+            title='Overview'
         ),
-        title='System Info'
-    ),
-    dp.Page(
-        dp.Select(
-            blocks=overview_list
+        dp.Page(
+            dp.Select(
+                blocks=big_plots_list
+            ),
+            title="Load Profile"
         ),
-        title='Overview'
-    ),
-    dp.Page(
-        dp.Select(
-            blocks=big_plots_list
+        dp.Page(
+            dp.Select(
+                blocks=select_list
+            ),
+            title="Critical Timestamps"
         ),
-        title="Load Profile"
-    ),
-    dp.Page(
-        dp.Select(
-            blocks=select_list
+        dp.Page(
+            dp.Select(
+                blocks=wait_class_list
+            ),
+            title="Wait Classes",
         ),
-        title="Critical Timestamps"
-    ),
-    dp.Page(
-        dp.Select(
-            blocks=wait_class_list
-        ),
-        title="Wait Classes",
-    ),
-    dp.Page(
-        dp.Text("#### Top 10 most used tablespace"),
-        dp.Text("###### (ordered by IOs (Reads + Writes) desc)"),
-        dp.Select(
-            blocks=generate_tbs_io_list(tio),
-        ),
-        title="Tablespace IO"
+        dp.Page(
+            dp.Text("#### Top 10 most used tablespace"),
+            dp.Text("###### (ordered by IOs (Reads + Writes) desc)"),
+            dp.Select(
+                blocks=generate_tbs_io_list(tio),
+            ),
+            title="Tablespace IO"
+        )
     )
-)
+
+else:
+
+    datapane_app = dp.Blocks(
+        dp.Page(
+            dp.Group(
+                dp.Text("## Database Info"),
+                dp.Table(df_db),
+                columns=1
+            ),
+            dp.HTML("""
+                <html>
+                <body style="background-color:white;">
+                    <div>
+                    <p> &nbsp&nbsp&nbsp  </p>
+                    </div>
+                </body>
+                </html>
+                """),
+            dp.Group(
+                dp.Text("## Host Info"),
+                dp.Table(df_host),
+                columns=1
+            ),
+            title='System Info'
+        ),
+        dp.Page(
+            dp.Blocks(
+                blocks=overview_list[1:]  # only the summary plot
+            ),
+            title='Overview'
+        ),
+        dp.Page(
+            dp.Blocks(
+                blocks=big_plots_list[1:]  # only the summary plot
+            ),
+            title="Load Profile"
+        ),
+        dp.Page(
+            dp.Blocks(
+                blocks=select_list
+            ),
+            title="Critical Timestamps"
+        ),
+        dp.Page(
+            dp.Blocks(
+                blocks=wait_class_list
+            ),
+            title="Wait Classes",
+        ),
+        dp.Page(
+            dp.Text("#### Top 10 most used tablespace"),
+            dp.Text("###### (ordered by IOs (Reads + Writes) desc)"),
+            dp.Blocks(
+                blocks=generate_tbs_io_list(tio),
+            ),
+            title="Tablespace IO"
+        )
+    )
 
 
 

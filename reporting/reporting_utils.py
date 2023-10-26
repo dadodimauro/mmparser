@@ -60,9 +60,22 @@ def generate_timestamps_dropdown(block_list):
 
 def generate_critical_timestamp_block(sqlProcessor, waitClassesProcessor, foregroundEventWaitProcessor,
                                         tbsProcessor, figure, peak_df, label, instance):
-    peak_list = peak_df.index
+    peak_list = list(peak_df.index)
+
+    if len(peak_list) == 0:  # less than 2 peaks dp.Select DOES NOT work
+        block = dp.Group(
+            dp.Plot(figure),
+            label=label,
+        )
+
+        return block
+    
+    if len(peak_list) == 1:
+        peak_list.append(peak_list[0])
+    
     block_list = generate_timestamps_block_list(sqlProcessor, waitClassesProcessor, foregroundEventWaitProcessor,
                                                 tbsProcessor, peak_list, instance=instance, n=10)
+    
     dropdown = generate_timestamps_dropdown(block_list)
 
     block = dp.Group(
