@@ -4,9 +4,11 @@ import os
 import re
 from time import time
 from datetime import datetime
+# from dateutil import parser as dup
 from pathlib import Path
 from shutil import move
 import json
+from tqdm import tqdm
 
 
 def move_file(input_path, output_path):
@@ -66,7 +68,7 @@ class AWRParser:
         return text
 
     # parse AWR in html format
-    def parse(self, filelist):
+    def parse(self, filelist, verbose=False):
         """
         parse the html AWR reports into a pandas Dataframe
 
@@ -85,8 +87,10 @@ class AWRParser:
         output = {}
         host_info = {}
 
-        for filename in filelist:
-            print('Processing {0}...'.format(filename))
+        for filename in tqdm(filelist):
+            if verbose:
+                print('Processing {0}...'.format(filename))
+
             b_header = False  # begin header
             l_base = []  # report-specific info (list)
             d_base = ''  # report-specific info (string)
@@ -119,6 +123,7 @@ class AWRParser:
                     for tr in list(table.find_all('tr'))[1:3]:
                         snap = list(tr.find_all('td'))[2]
                         st = datetime.strptime(snap.text, '%d-%b-%y %H:%M:%S')
+                        # st = dup.parse(snap.text)  # dateutil parser
                         l_base.extend(str(x) for x in (st.year, st.month, st.day, st.hour, st.minute, st.second))
                     d_base = ','.join(l_base) + ','
 
@@ -162,7 +167,7 @@ class AWRParser:
         return output
 
     def make_csv(self, mode='append', input_dir='data/raw/awr', output_dir='data/parsed/awr',
-                        recursive=False):
+                        recursive=False, verbose=False):
         """
         Parse the data and stores it into multiple .csv files, one for each AWR table
 
@@ -178,6 +183,8 @@ class AWRParser:
         recursive: (optional) bool
                     if there are subfolders in the specified input directory to be used
                     (like the -r in unix)
+        verbose: (optional)
+                    to display detailed information of what the parser is doing
         """
 
         if mode not in ['append', 'new']:
@@ -191,11 +198,13 @@ class AWRParser:
             filelist = sorted(filepath.glob('*.html'))
 
         # parse AWR
-        output = self.parse(filelist)
+        output = self.parse(filelist, verbose)
 
+
+        print("Writing csv files...")
         # write .csv file
         out_filepath = Path(output_dir)
-        for csvname in output:
+        for csvname in tqdm(output):
             flag = False  # if flag is true skip first line (skip intestation if append mode)
             if mode == 'append':
                 out_filepath = Path(f'{output_dir}') / csvname
@@ -223,6 +232,9 @@ class AWRParser:
                 f.write(line + '\n')
 
             f.close()
+
+
+        return output
 
             # TODO test if it works
             # move in obsolete folder all file used
